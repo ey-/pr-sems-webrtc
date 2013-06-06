@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <iostream>
 #include <fstream>
+#include <libwebsockets.h>
 using namespace std;
 
 #include <signal.h>
@@ -183,7 +184,7 @@ void CWebSocketServer::start()
 /** Stop it ! */
 void CWebSocketServer::stop()
 {
-	libwebsocket_context_destroy(mContext);
+	//libwebsocket_context_destroy(mContext);
 	mContext = 0;
 
 	AmThread::stop();

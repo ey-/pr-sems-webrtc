@@ -1,5 +1,6 @@
-#ifndef WEBSOCKET_SERVER_H
-#define WEBSOCKET_SERVER_H
+#ifndef _WebSocketServer_h_
+#define _WebSocketServer_h_
+
 
 #include "AmThread.h"
 #include "singleton.h"
