@@ -23,8 +23,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _WEBSOCKET_H_
-#define _WEBSOCKET_H_
+#ifndef _WebSocket_h_
+#define _WebSocket_h_
 
 #include "AmSession.h"
 #include "AmAudioFile.h"

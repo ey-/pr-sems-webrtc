@@ -32,13 +32,14 @@
 #include "sems.h"
 #include "log.h"
 
-#define MOD_NAME "WebSocket"
+#define MOD_NAME "websocket"
 
 EXPORT_SESSION_FACTORY(WebSocketFactory,MOD_NAME);
 
 string WebSocketFactory::AnnouncePath;
 string WebSocketFactory::AnnounceFile;
 bool   WebSocketFactory::Loop = false;
+WebSocketServer* WebSocketFactory::mWebSocketServer;
 
 
 WebSocketFactory::WebSocketFactory(const string& _app_name)
@@ -51,8 +52,8 @@ int WebSocketFactory::onLoad()
 {
 	INFO("WebSocketFactory::onLoad\n");
   AmConfigReader cfg;
-  if(cfg.loadFile(AmConfig::ModConfigPath + string(MOD_NAME ".conf")))
-    return -1;
+  //if(cfg.loadFile(AmConfig::ModConfigPath + string(MOD_NAME ".conf")))
+    //return -1;
 
   // get application specific global parameters
   //configureModule(cfg);
@@ -166,7 +167,7 @@ void WebSocketDialog::process(AmEvent* event)
 
   AmAudioEvent* audio_event = dynamic_cast<AmAudioEvent*>(event);
   if(audio_event && (audio_event->event_id == AmAudioEvent::cleared)){
-    dlg.bye();
+    dlg->bye();
     setStopped();
     return;
   }
