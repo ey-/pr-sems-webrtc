@@ -20,6 +20,19 @@ using namespace std;
 #include <signal.h>
 #include "WebSocketServer.h"
 #include "log.h"
+#include "../../core/sip/trans_layer.h"
+
+WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi)
+:sip_msg()
+{
+	websocket = wsi;
+}
+
+WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi, const char* msg_buf, int msg_len)
+:sip_msg(msg_buf, msg_len)
+{
+	websocket = wsi;
+}
 
 int callback_sip (struct libwebsocket_context *context,
 		struct libwebsocket *wsi,
@@ -33,38 +46,44 @@ int callback_sip (struct libwebsocket_context *context,
 		printf("connection established\n");
 		break;
 	case LWS_CALLBACK_RECEIVE:{
-		  ofstream myfile;
-		  myfile.open ("example.txt");
-		  myfile << "Writing this to a file.\n" << endl;
-		  myfile << (char *)in << endl;
+		 // ofstream myfile;
+		 // myfile.open ("example.txt");
+		 // myfile << "Writing this to a file.\n" << endl;
+		 // myfile << (char *)in << endl;
 
-		  printf("receivengin: %s", (char *) in);
-		const char* header = "SIP/2.0 200 OK\r\n";
-		int header_length = strlen(header);
+		printf("receivin: %s", (char *) in);
+		//INFO((char*) in);
+		//const char* header = "SIP/2.0 200 OK\r\n";
+		//int header_length = strlen(header);
 		//strtok((char*)in, "\r");
 
-		in = (void*)(strchr((char*)in, '\r') +2);
-		len = strlen((char*)in);
+		//in = (void*)(strchr((char*)in, '\r') +2);
+		//len = strlen((char*)in);
 
 		//printf("%s" , splittet_in);
-		int length= header_length+len;
-        unsigned char *buf = (unsigned char*) malloc(LWS_SEND_BUFFER_PRE_PADDING + length +
-                                                     LWS_SEND_BUFFER_POST_PADDING);
-        printf("received datalength: %i", (int) header_length);
-        printf("received: %s", (char *) in);
-        int i;
+		//int length=len;
+       // unsigned char *buf = (unsigned char*) malloc(LWS_SEND_BUFFER_PRE_PADDING + len +
+         //                                            LWS_SEND_BUFFER_POST_PADDING);
+        //printf("received datalength: %i", (int) header_length);
+        //printf("received: %s", (char *) in);
+       // int i;
 
-        for (i=0 ; i<header_length; i++) {
+/*        for (i=0 ; i<header_length; i++) {
         	buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = ((char *) header)[i];
         }
-        for (i=header_length; i <length; i++) {
-            buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = ((char *) in)[i+header_length];
-        }
-        myfile << (char *)buf << endl;
+        for (i=0; i <len; i++) {
+            buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = ((char *) in)[i];
+        }*/
 
-        libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING],length, LWS_WRITE_BINARY);
-        free(buf);
-        myfile.close();
+
+        WebsocketMsg* s_msg = new WebsocketMsg(wsi,(const char*)in,len);
+        trans_layer::instance()->received_msg(s_msg);
+        //myfile << (char *)buf << endl;
+        printf((char*)in);
+
+
+        //free(buf);
+        //myfile.close();
 		break;
 		}
 	}
@@ -131,7 +150,7 @@ int main(void) {
  */
 
 CWebSocketServer::CWebSocketServer()
-:AmThread()
+:trsp_socket(0,0),AmThread()
 {
 	mbFailure = false;
 	mContext = 0;
@@ -144,6 +163,17 @@ CWebSocketServer::~CWebSocketServer()
 		libwebsocket_context_destroy(mContext);
 		mContext = 0;
 	}
+}
+
+int CWebSocketServer::bind(const string& address, unsigned short port)
+{
+	return 0;
+}
+
+int CWebSocketServer::send(const sockaddr_storage* sa, const char* msg, const int msg_len)
+{
+	msg->
+	return libwebsocket_write(wsi, &msg[LWS_SEND_BUFFER_PRE_PADDING],len, LWS_WRITE_BINARY);
 }
 
 /** Start it ! */

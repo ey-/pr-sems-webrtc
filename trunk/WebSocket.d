@@ -18,5 +18,11 @@ WebSocket.o: WebSocket.cpp WebSocket.h ../../core/AmSession.h \
  ../../core/AmBufferedAudio.h ../../core/AmConfigReader.h \
  ../../core/AmUACAuth.h ../../core/ampi/UACAuthAPI.h ../../core/AmArg.h \
  ../../core/AmSipDialog.h ../../core/AmSession.h WebSocketServer.h \
- ../../core/AmThread.h ../../core/AmConfig.h ../../core/AmUtils.h \
- ../../core/AmPlugIn.h ../../core/sems.h ../../core/log.h
+ ../../core/AmThread.h ../../core/sip/sip_parser.h \
+ ../../core/sip/parse_uri.h ../../core/sip/resolver.h \
+ ../../core/hash_table.h ../../core/atomic_types.h \
+ ../../core/sip/parse_dns.h ../../core/sip/parse_next_hop.h \
+ ../../core/sip/transport.h ../../core/sip/../AmThread.h \
+ ../../core/sip/../atomic_types.h ../../core/AmConfig.h \
+ ../../core/AmUtils.h ../../core/AmPlugIn.h ../../core/sems.h \
+ ../../core/log.h

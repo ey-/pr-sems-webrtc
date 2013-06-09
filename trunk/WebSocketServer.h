@@ -5,11 +5,21 @@
 #include "AmThread.h"
 #include "singleton.h"
 #include <libwebsockets.h>
+#include "../../core/sip/sip_parser.h"
+#include "../../core/sip/transport.h"
 
 struct per_session_data__echo {
 	unsigned char buf[100];
 	unsigned int len;
 	unsigned int index;
+};
+
+struct WebsocketMsg : sip_msg
+{
+	WebsocketMsg(struct libwebsocket *wsi);
+	WebsocketMsg(struct libwebsocket *wsi, const char* msg_buf, int msg_len);
+
+	struct libwebsocket *websocket;
 };
 
 static int callback_sip (struct libwebsocket_context *context,
@@ -41,7 +51,7 @@ static struct libwebsocket_protocols protocols[] = {
 };
 
 class CWebSocketServer
-:AmThread
+:trsp_socket,AmThread
 {
 public:
 	CWebSocketServer();
@@ -51,6 +61,13 @@ public:
 	void start();
 	/** Stop it ! */
 	void stop();
+
+    virtual int bind(const string& address, unsigned short port);
+
+    virtual const char* get_transport() const
+    { return "WebRTC"; }
+
+    virtual int send(const sockaddr_storage* sa, const char* msg, const int msg_len);
 
 protected:
 	virtual void run();
