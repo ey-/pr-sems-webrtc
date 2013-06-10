@@ -22,17 +22,17 @@ using namespace std;
 #include "log.h"
 #include "../../core/sip/trans_layer.h"
 
-WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi)
-:sip_msg()
-{
-	websocket = wsi;
-}
-
-WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi, const char* msg_buf, int msg_len)
-:sip_msg(msg_buf, msg_len)
-{
-	websocket = wsi;
-}
+//WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi)
+//:sip_msg()
+//{
+//	websocket = wsi;
+//}
+//
+//WebsocketMsg::WebsocketMsg(struct libwebsocket *wsi, const char* msg_buf, int msg_len)
+//:sip_msg(msg_buf, msg_len)
+//{
+//	websocket = wsi;
+//}
 
 int callback_sip (struct libwebsocket_context *context,
 		struct libwebsocket *wsi,
@@ -50,8 +50,8 @@ int callback_sip (struct libwebsocket_context *context,
 		 // myfile.open ("example.txt");
 		 // myfile << "Writing this to a file.\n" << endl;
 		 // myfile << (char *)in << endl;
-
-		printf("receivin: %s", (char *) in);
+		printf("callback_sip");
+		//printf("receivin: %s", (char *) in);
 		//INFO((char*) in);
 		//const char* header = "SIP/2.0 200 OK\r\n";
 		//int header_length = strlen(header);
@@ -75,11 +75,13 @@ int callback_sip (struct libwebsocket_context *context,
             buf[LWS_SEND_BUFFER_PRE_PADDING + i ] = ((char *) in)[i];
         }*/
 
-
-        WebsocketMsg* s_msg = new WebsocketMsg(wsi,(const char*)in,len);
+		WebSocketServer::instance()->setSocket(wsi);
+        //WebsocketMsg* s_msg = new WebsocketMsg(wsi,(const char*)in,len);
+		sip_msg* s_msg = new sip_msg((const char*)in,len);
+		s_msg->local_socket = WebSocketServer::instance();
         trans_layer::instance()->received_msg(s_msg);
         //myfile << (char *)buf << endl;
-        printf((char*)in);
+        //printf((char*)in);
 
 
         //free(buf);
@@ -154,6 +156,7 @@ CWebSocketServer::CWebSocketServer()
 {
 	mbFailure = false;
 	mContext = 0;
+	mSocket = 0;
 }
 
 CWebSocketServer::~CWebSocketServer()
@@ -172,10 +175,27 @@ int CWebSocketServer::bind(const string& address, unsigned short port)
 
 int CWebSocketServer::send(const sockaddr_storage* sa, const char* msg, const int msg_len)
 {
-	msg->
-	return libwebsocket_write(wsi, &msg[LWS_SEND_BUFFER_PRE_PADDING],len, LWS_WRITE_BINARY);
+	INFO("send CWebSocketServer");
+	DBG("sending msg %s",msg);
+	if (!mSocket)
+		{
+		return -1;
+		}
+	unsigned short bufferLen = LWS_SEND_BUFFER_PRE_PADDING + msg_len +
+            LWS_SEND_BUFFER_POST_PADDING;
+    unsigned char *buf = (unsigned char*) malloc(bufferLen);
+    memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], msg, msg_len);
+	return libwebsocket_write(mSocket, &buf[LWS_SEND_BUFFER_PRE_PADDING],bufferLen, LWS_WRITE_BINARY);
 }
 
+void CWebSocketServer::setSocket(libwebsocket* socket)
+{
+	if (mSocket == false)
+	{
+		mSocket=socket;
+	}
+	return;
+}
 /** Start it ! */
 void CWebSocketServer::start()
 {
