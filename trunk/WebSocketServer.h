@@ -51,7 +51,7 @@ static struct libwebsocket_protocols protocols[] = {
 };
 
 class CWebSocketServer
-:trsp_socket,AmThread
+: public trsp_socket,AmThread
 {
 public:
 	CWebSocketServer();
@@ -62,10 +62,14 @@ public:
 	/** Stop it ! */
 	void stop();
 
+	void setSocket(libwebsocket* socket);
+
     virtual int bind(const string& address, unsigned short port);
 
     virtual const char* get_transport() const
-    { return "WebRTC"; }
+    {
+    	INFO("in get transport ");
+    	return "webrtc"; }
 
     virtual int send(const sockaddr_storage* sa, const char* msg, const int msg_len);
 
@@ -76,6 +80,7 @@ protected:
 protected:
 	bool mbFailure;
 	struct libwebsocket_context* mContext;
+	libwebsocket* mSocket;
 };
 
 typedef singleton<CWebSocketServer> WebSocketServer;
