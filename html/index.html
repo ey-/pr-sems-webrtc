@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>jssip test</title>
+</head>
+<body>
+<script language="JavaScript" src="jssip-0.3.0.js" ></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+
+<script language="JavaScript">
+var configuration = {
+  'ws_servers': 'ws://192.168.111.137:7681',
+  'uri': 'sip:ey91@iptel.org',
+  'password' : 'icefc9le',
+  'register' :false,
+  'trace_sip': true,
+};
+
+var coolPhone = new JsSIP.UA(configuration);
+
+coolPhone.on('newMessage', function(e){ console.log(e) });
+coolPhone.on('registered', function(e){ console.log(e) });
+
+coolPhone.on('connected', function(e){ 
+	$('#message').append('Connection opened');
+	console.log("Connected");
+	console.log(e);
+	$('#send').click(function() {
+	var contentType = "text/plain";
+	var text = 'Hello Bob!';
+	var eventHandlers = {
+		'succeeded': function(e){ console.log(e) },
+		'failed':    function(e){ console.log(e) }
+	};
+	coolPhone.sendMessage('sip:bob@example.com', text, contentType, eventHandlers);
+	})
+	
+	$('#anruf').click(function(){
+		// Use audio and video
+		var useAudio = true;
+		var useVideo = false;
+
+		var views = {	
+		'selfView':   document.getElementById('selfview'),
+		'remoteView': document.getElementById('targetview')
+		};
+
+		var eventHandlers = {
+		'connecting': function(e){ console.log(e) },
+		'progress':   function(e){ console.log(e) },
+		'failed':     function(e){ console.log(e) },
+		'started':    function(e){ console.log(e) },
+		'ended':      function(e){ console.log(e) }
+		};
+
+		coolPhone.call('ey2@192.168.111.137', useAudio, useVideo, eventHandlers, views);
+	}
+	)
+	
+  });
+
+coolPhone.start();
+
+/**
+ws= new WebSocket('ws://192.168.111.1130:7681', 'sip');
+ws.onopen = function(){  
+    $('#message').append('Connection opened');
+        $('#send').click(function() {
+		ws.send('hi');
+	});
+}  
+    ws.onmessage = function(msg){ 
+		$('#message').append('Message arrived'); 
+		console.log(msg);
+        $('#message').append(msg.data); //Awesome!  
+    }  
+   */ 
+
+
+</script>
+
+<div id=message></div>
+<div id=send>sende an server</div>
+<div id=anruf>versuche anruf</div>
+<video id=selfview></video>
+<video id=targetview></video>
+</body>
+</html>
