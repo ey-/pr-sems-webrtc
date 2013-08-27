@@ -69,7 +69,7 @@ public:
     virtual const char* get_transport() const
     {
     	INFO("in get transport ");
-    	return "webrtc"; }
+    	return "ws"; }
 
     virtual int send(const sockaddr_storage* sa, const char* msg, const int msg_len);
 
