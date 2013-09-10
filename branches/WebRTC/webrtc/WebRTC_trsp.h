@@ -3,6 +3,27 @@
 
 #include "../../core/sip/transport.h"
 #include "ServerSocket.h"
+#include "ClientSocket.h"
+
+#define MAX_POLL_ELEMENTS 100
+struct pollfd pollfds[100];
+int count_pollfds = 0;
+
+struct per_session_data__echo {
+	unsigned char buf[100];
+	unsigned int len;
+	unsigned int index;
+};
+
+static int callback_sip (struct libwebsocket_context *context,
+		struct libwebsocket *wsi,
+		enum libwebsocket_callback_reasons reason,
+		void *user, void *in, size_t len);
+
+static int callback_http(struct libwebsocket_context *context,
+                         struct libwebsocket *wsi,
+                         enum libwebsocket_callback_reasons reason,
+                         void *user, void *in, size_t len);
 
 static struct libwebsocket_protocols protocols[] = {
     /* first protocol must always be HTTP handler */
@@ -21,6 +42,7 @@ static struct libwebsocket_protocols protocols[] = {
         NULL, NULL, 0   /* End of list */
     }
 };
+
 
 class WebRTC_trsp: public transport
 {
