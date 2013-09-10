@@ -27,6 +27,8 @@
 #define _WebRTC_h_
 
 #include "AmSession.h"
+#include "ServerSocket.h"
+#include "WebRTC_trsp.h"
 //#include "AmAudioFile.h"
 //#include "AmConfigReader.h"
 
