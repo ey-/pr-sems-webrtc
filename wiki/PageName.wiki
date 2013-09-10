@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
-Mainpage
+#summary Mainpage
+
 = Introduction =
 This is the main page, where you can read all about the documentation of this SEMS Module.
 
