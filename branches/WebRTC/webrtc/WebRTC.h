@@ -37,6 +37,8 @@
 /** \brief Factory for WebRTC sessions */
 class CWebRTCFactory: public AmSessionFactory
 {
+private:
+	WebRTC_trsp* webrtc_trsp;
 public:
 
 

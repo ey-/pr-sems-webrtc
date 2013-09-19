@@ -1,7 +1,12 @@
 #ifndef SERVERSOCKET_H
 #define SERVERSOCKET_H
+
 #include "../../core/sip/transport.h"
-#include "ClientSocket.h"
+#include "singleton.h"
+#include "AmConfig.h"
+#include "lwebsockets_declarations.h"
+
+class ClientSocket;
 
 class ServerSocket : public trsp_socket
 {
@@ -14,6 +19,7 @@ public:
     virtual int bind(const string& address, unsigned short port);
     virtual const char* get_transport() const;
     libwebsocket_context* get_context();
+    void add_connection(ClientSocket* client);
 };
 class ServerSocketWrapper
 {
@@ -23,8 +29,7 @@ public:
 	ServerSocketWrapper();
 	~ServerSocketWrapper();
 	ServerSocket* get_ServerSocket();
-	void add_connection(ClientSocket* client);
 };
 typedef singleton<ServerSocketWrapper> SServerSocket;
 
-#endif;
+#endif
