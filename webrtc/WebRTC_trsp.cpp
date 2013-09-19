@@ -1,6 +1,10 @@
 #include "WebRTC_trsp.h"
 
 
+#define MAX_POLL_ELEMENTS 100
+struct pollfd pollfds[100];
+int count_pollfds = 0;
+
 int callback_http(struct libwebsocket_context *context,
                          struct libwebsocket *wsi,
                          enum libwebsocket_callback_reasons reason,
@@ -14,6 +18,7 @@ int callback_http(struct libwebsocket_context *context,
 	{
 
 	case LWS_CALLBACK_ADD_POLL_FD:
+	{
 		INFO("LWS_CALLBACK_ADD_POLL_FD");
 
 		pollfds[count_pollfds].fd = (int)(long)user;
@@ -24,15 +29,17 @@ int callback_http(struct libwebsocket_context *context,
 					     sizeof(client_name), client_ip, sizeof(client_ip));
 
 		struct sockaddr_storage sa;
-		if (inet_pton(AF_INET,client_ip,&(((struct sockaddr_in *)sa)->sin_addr)) == 0)
+		if (inet_pton(AF_INET,client_ip,&(((struct sockaddr_in *)&sa)->sin_addr)) == 0)
 		{
-			inet_pton(AF_INET6,client_ip,&(((struct sockaddr_in6 *)sa)->sin6_addr));
+			inet_pton(AF_INET6,client_ip,&(((struct sockaddr_in6 *)&sa)->sin6_addr));
 		}
 
-		ClientSocket* client = new ClientSocket((ServerSocket)SServerSocket::instance()->get_ServerSocket(),pollfds[count_pollfds-1].fd,sa);
+		ClientSocket* client = new ClientSocket((ServerSocket*)SServerSocket::instance()->get_ServerSocket(),pollfds[count_pollfds-1].fd,&sa);
 		SServerSocket::instance()->get_ServerSocket()->add_connection(client);
 		break;
+	}
 	case LWS_CALLBACK_DEL_POLL_FD:
+	{
 		INFO("LWS_CALLBACK_DEL_POLL_FD");
 
 		for (n = 0; n < count_pollfds; n++)
@@ -43,14 +50,18 @@ int callback_http(struct libwebsocket_context *context,
 				}
 		count_pollfds--;
 		break;
+	}
 	case LWS_CALLBACK_SET_MODE_POLL_FD:
+	{
 		INFO("LWS_CALLBACK_SET_MODE_POLL_FD");
 
 		for (n = 0; n < count_pollfds; n++)
 			if (pollfds[n].fd == (int)(long)user)
 				pollfds[n].events |= (int)(long)len;
 		break;
+	}
 	case LWS_CALLBACK_CLEAR_MODE_POLL_FD:
+	{
 		INFO("LWS_CALLBACK_CLEAR_MODE_POLL_FD");
 
 		for (n = 0; n < count_pollfds; n++)
@@ -58,9 +69,12 @@ int callback_http(struct libwebsocket_context *context,
 						pollfds[n].events &= ~(int)(long)len;
 
 		break;
+	}
 	default:
+	{
 		INFO("reason : %u",(int)reason);
 		break;
+	}
 	}
 
     return 0;

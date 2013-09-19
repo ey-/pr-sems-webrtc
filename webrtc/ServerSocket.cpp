@@ -57,6 +57,10 @@ libwebsocket_context* ServerSocket::get_context()
 	return mContext;
 }
 
+void ServerSocket::add_connection(ClientSocket* client)
+{
+
+}
 
 
 ServerSocketWrapper::ServerSocketWrapper()
@@ -72,3 +76,5 @@ ServerSocket* ServerSocketWrapper::get_ServerSocket()
 {
 	return mServerSocket;
 }
+
+

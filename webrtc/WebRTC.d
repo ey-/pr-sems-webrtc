@@ -14,4 +14,7 @@ WebRTC.o: WebRTC.cpp WebRTC.h ../../core/AmSession.h \
  ../../core/AmConfig.h ../../core/AmUtils.h ../../core/md5.h \
  ../../core/md5global.h ../../core/AmConfigReader.h \
  ../../core/atomic_types.h ../../core/AmSessionEventHandler.h \
- ../../core/AmMediaProcessor.h
+ ../../core/AmMediaProcessor.h ServerSocket.h ../../core/sip/transport.h \
+ ../../core/sip/../AmThread.h ../../core/sip/../atomic_types.h \
+ ../../core/AmConfig.h lwebsockets_declarations.h WebRTC_trsp.h \
+ ClientSocket.h
