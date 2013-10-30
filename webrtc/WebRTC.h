@@ -27,26 +27,24 @@
 #define _WebRTC_h_
 
 #include "AmSession.h"
-#include "ServerSocket.h"
 #include "WebRTC_trsp.h"
-//#include "AmAudioFile.h"
-//#include "AmConfigReader.h"
 
-
+#define WEBRTC_MODULE_NAME "WebRTC"
 
 /** \brief Factory for WebRTC sessions */
 class CWebRTCFactory: public AmSessionFactory
 {
-private:
-	WebRTC_trsp* webrtc_trsp;
 public:
-
-
   CWebRTCFactory(const string& _app_name);
+  virtual ~CWebRTCFactory();
 
   int onLoad();
   AmSession* onInvite(const AmSipRequest& req, const string& app_name,
 		      const map<string,string>& app_params);
+
+private:
+  ServerSocket* mpServerSocket;
+  WebRTC_trsp* mpWebRTCTransport;
 
 };
 
