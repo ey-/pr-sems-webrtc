@@ -3,6 +3,7 @@ ClientSocket.cpp
 ServerSocket.cpp
 WebRTC.cpp
 WebRTC_trsp.cpp
+LibWebsocketAdapter.cpp
 )
 
 INCLUDE(lib/libwebsockets.c)
