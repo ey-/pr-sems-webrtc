@@ -39,6 +39,7 @@ int CWebRTCFactory::onLoad()
 
 	mpWebRTCTransport = new WebRTC_trsp(mpServerSocket);
 	INFO("WebRTC\tWebRTC Transport created\n");
+
 	mpWebRTCTransport->start();
 	INFO("WebRTC\tWebRTC Transport started\n");
 
