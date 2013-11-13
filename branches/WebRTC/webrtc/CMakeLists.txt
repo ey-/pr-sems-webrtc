@@ -1,9 +1,10 @@
 set (webrtc_SRCS
-ClientSocket.cpp
-ServerSocket.cpp
 WebRTC.cpp
 WebRTC_trsp.cpp
 LibWebsocketAdapter.cpp
+ServerSocket.cpp
+ClientSocket.cpp
+SocketHelper.cpp
 )
 
 INCLUDE(lib/libwebsockets.c)

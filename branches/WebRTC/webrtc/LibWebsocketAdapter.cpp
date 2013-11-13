@@ -1,12 +1,13 @@
 #include "LibWebsocketAdapter.h"
 #include "../../core/log.h"
+#include <string.h>
+
+LibWebsocketAdapter* LibWebsocketAdapter::mpStaticInstance = NULL;
 
 LibWebsocketAdapter::LibWebsocketAdapter()
 {
 	mpReceiver = NULL;
 	mpContext = NULL;
-
-	initLibWebsocket();
 }
 
 LibWebsocketAdapter::~LibWebsocketAdapter()
@@ -19,7 +20,7 @@ LibWebsocketAdapter::~LibWebsocketAdapter()
 
 void LibWebsocketAdapter::initLibWebsocket()
 {
-	int port = 7682;
+	int port = 7689;
 	const char *interface = NULL;
 
 	// we're not using ssl
@@ -29,6 +30,7 @@ void LibWebsocketAdapter::initLibWebsocket()
 	// no special options
 	int opts = 0;
 	struct lws_context_creation_info info;
+	memset(&info, 0, sizeof(info));
 	info.extensions=libwebsocket_get_internal_extensions();
 	info.port=port;
 	info.protocols =protocols;

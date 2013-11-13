@@ -12,11 +12,17 @@ class LibWebsocketAdapter : public ILibWebsocketCallback
 public:
 	static LibWebsocketAdapter* getInstance()
 	{
-		INFO("WebRTC\tcreate Instance\n");
-		static LibWebsocketAdapter staticInstance = LibWebsocketAdapter();
-		INFO("WebRTC\tcreated Instance\n");
-		return &staticInstance;
+		if (mpStaticInstance == NULL)
+		{
+			INFO("WebRTC\tcreate Instance\n");
+			mpStaticInstance = new LibWebsocketAdapter();
+			INFO("WebRTC\tcreated Instance\n");
+		}
+		return mpStaticInstance;
 	}
+
+protected:
+	static LibWebsocketAdapter* mpStaticInstance;
 
 public:
 	LibWebsocketAdapter();
@@ -33,8 +39,8 @@ public:
 							 struct libwebsocket *wsi,
 							 enum libwebsocket_callback_reasons reason,
 							 void *user, void *in, size_t len);
+	struct libwebsocket_context* getContext() { return mpContext; };
 
-protected:
 	void initLibWebsocket();
 
 protected:

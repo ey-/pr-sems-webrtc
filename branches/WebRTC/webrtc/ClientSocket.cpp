@@ -1,9 +1,10 @@
 #include "ClientSocket.h"
 
-ClientSocket::ClientSocket(ServerSocket* server_sock,int sd, sockaddr_storage* sa)
+ClientSocket::ClientSocket(ServerSocket* server_sock,int sd, sockaddr_storage sa)
 : trsp_socket(server_sock->get_if(),0,0,sd)
 {
 	mServer_sock = server_sock;
+	mSocketAddress = sa;
 }
 
 ClientSocket::~ClientSocket()
