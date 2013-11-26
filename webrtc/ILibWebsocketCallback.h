@@ -1,3 +1,10 @@
+/*
+ * ILibWebsocketCallback.h
+ *
+ *      Authors: Arne Krawielitzki <arne.krawie@gmail.com>
+ *		Engin Yilmaz <ey@esyi.de>
+ */
+
 #ifndef ILIB_WEBSOCKET_CALLBACK_H
 #define ILIB_WEBSOCKET_CALLBACK_H
 

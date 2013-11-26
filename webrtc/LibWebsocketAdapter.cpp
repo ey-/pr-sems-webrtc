@@ -1,3 +1,10 @@
+/*
+ * LibWebsocketAdapter.cpp
+ *
+ *      Authors: Arne Krawielitzki <arne.krawie@gmail.com>
+ *		Engin Yilmaz <ey@esyi.de>
+ */
+
 #include "LibWebsocketAdapter.h"
 #include "../../core/log.h"
 #include <string.h>
@@ -60,6 +67,12 @@ void LibWebsocketAdapter::registerCallbackReceiver(ILibWebsocketCallback* receiv
 {
 	INFO("CallbackReceiver registered");
 	mpReceiver = receiver;
+}
+
+int LibWebsocketAdapter::send(unsigned char* data, int dataLength, struct libwebsocket* wsi)
+{
+DBG("sending msg: %s",data);
+	return libwebsocket_write(wsi, data, dataLength, LWS_WRITE_BINARY);
 }
 
 int LibWebsocketAdapter::callbackHTTP(struct libwebsocket_context *context,
