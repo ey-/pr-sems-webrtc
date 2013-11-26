@@ -1,3 +1,10 @@
+/*
+ * LibWebsocketAdapter.h
+ *
+ *      Authors: Arne Krawielitzki <arne.krawie@gmail.com>
+ *		Engin Yilmaz <ey@esyi.de>
+ */
+
 #ifndef LIB_WEBSOCKET_ADAPTER_H
 #define LIB_WEBSOCKET_ADAPTER_H
 
@@ -28,7 +35,11 @@ public:
 	LibWebsocketAdapter();
 	virtual ~LibWebsocketAdapter();
 
+	void initLibWebsocket();
+
 	void registerCallbackReceiver(ILibWebsocketCallback* receiver);
+
+	int send(unsigned char* data, int dataLength, struct libwebsocket* wsi);
 
 	virtual int callbackHTTP(struct libwebsocket_context *context,
 	                         struct libwebsocket *wsi,
@@ -40,8 +51,6 @@ public:
 							 enum libwebsocket_callback_reasons reason,
 							 void *user, void *in, size_t len);
 	struct libwebsocket_context* getContext() { return mpContext; };
-
-	void initLibWebsocket();
 
 protected:
 	ILibWebsocketCallback* mpReceiver;

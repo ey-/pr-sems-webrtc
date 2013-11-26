@@ -1,3 +1,10 @@
+/*
+ * WebRTC_trsp.h
+ *
+ *      Authors: Arne Krawielitzki <arne.krawie@gmail.com>
+ *		Engin Yilmaz <ey@esyi.de>
+ */
+
 #ifndef _WEBRTC_TRSP_H
 #define _WEBRTC_TRSP_H
 
