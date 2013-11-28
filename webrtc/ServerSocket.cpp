@@ -9,6 +9,8 @@
 #include "ClientSocket.h"
 
 #include "SocketHelper.h"
+#include "LibWebsocketAdapter.h"
+#include <private-libwebsockets.h>
 
 ServerSocket::ServerSocket(unsigned short if_num)
 :trsp_socket(if_num,0)
@@ -55,7 +57,7 @@ int ServerSocket::bind(const string& address, unsigned short port)
 
 const char* ServerSocket::get_transport() const
 {
-	return "WS";
+	return "ws";
 }
 
 bool ServerSocket::registerClient(ClientSocket* pClientSocket)
@@ -66,7 +68,7 @@ bool ServerSocket::registerClient(ClientSocket* pClientSocket)
 	DBG("adding WebRTC connection from %s", connId.c_str());
 
 	mConnectionsMutex.lock();
-
+DBG("connectionmutex locked");
 	CONNECTION_MAP::iterator connectionIter = mConnections.find(connId);
 	// Prüfen ob die Verbindung bereits vorhanden ist
 	if (connectionIter != mConnections.end())
@@ -87,6 +89,7 @@ bool ServerSocket::registerClient(ClientSocket* pClientSocket)
 	inc_ref(pClientSocket);
 
 	mConnectionsMutex.unlock();
+	DBG("connectionmutex unlocked");
 	return true;
 }
 
@@ -131,20 +134,12 @@ void ServerSocket::triggerSend()
 	mClientSocketQueueMutex.unlock();
 }
 
-int ServerSocket::getClientSdByWSI(struct libwebsocket *wsi)
+int ServerSocket::get_sd() const
 {
-    for (CONNECTION_MAP::iterator iter = mConnections.begin();
-			iter != mConnections.end();
-			iter++)
-	{
-		ClientSocket* pClientSocket = (*iter).second;
-        struct libwebsocket* connWsi = pClientSocket->getWSI();
-
-		if (wsi == connWsi)
-		{
-		    DBG("ServerSocket getClientByWSI wsi==connWsi");
-			// Message an Clientsocket weiterleiten
-			return pClientSocket->get_sd();
-		}
-	}
+   libwebsocket_context* context = LibWebsocketAdapter::getInstance()->getContext();
+    if (context != NULL)
+    {
+        return LibWebsocketAdapter::getInstance()->getContext()->fds->fd;
+    }
+    return -1;
 }

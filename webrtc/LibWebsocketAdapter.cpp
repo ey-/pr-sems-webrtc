@@ -8,6 +8,7 @@
 #include "LibWebsocketAdapter.h"
 #include "../../core/log.h"
 #include <string.h>
+#include <private-libwebsockets.h>
 
 LibWebsocketAdapter* LibWebsocketAdapter::mpStaticInstance = NULL;
 
@@ -52,7 +53,7 @@ void LibWebsocketAdapter::initLibWebsocket()
 
 	// create libwebsocket context representing this server
 	mpContext = libwebsocket_create_context(&info);
-	INFO("WebRTC\tCreated Context\n");
+	INFO("WebRTC\tCreated Context\n pollfd:%i",mpContext->fds->fd);
 	if (mpContext == NULL)
 	{
 		ERROR("libwebsocket init failed\n");
@@ -71,8 +72,8 @@ void LibWebsocketAdapter::registerCallbackReceiver(ILibWebsocketCallback* receiv
 
 int LibWebsocketAdapter::send(unsigned char* data, int dataLength, struct libwebsocket* wsi)
 {
-DBG("sending msg: %s",data);
-	return libwebsocket_write(wsi, data, dataLength, LWS_WRITE_BINARY);
+//DBG("sending msg: %s",data);
+	return libwebsocket_write(wsi, data, dataLength, LWS_WRITE_TEXT);
 }
 
 int LibWebsocketAdapter::callbackHTTP(struct libwebsocket_context *context,

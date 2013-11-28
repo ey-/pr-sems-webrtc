@@ -64,6 +64,7 @@ static int callback_sip (struct libwebsocket_context *context,
 		enum libwebsocket_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
+    DBG("Callback Static sip");
 	return LibWebsocketAdapter::getInstance()->callbackSIP(context, wsi, reason, user, in, len);
 }
 
@@ -72,6 +73,7 @@ static int callback_http(struct libwebsocket_context *context,
                          enum libwebsocket_callback_reasons reason,
                          void *user, void *in, size_t len)
 {
+        DBG("Callback Static http");
 	return LibWebsocketAdapter::getInstance()->callbackHTTP(context, wsi, reason, user, in, len);
 }
 

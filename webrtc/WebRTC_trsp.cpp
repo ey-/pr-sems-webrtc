@@ -12,6 +12,7 @@
 #include "ClientSocket.h"
 #include "../../core/sip/sip_parser.h"
 #include "../../core/sip/trans_layer.h"
+#include <private-libwebsockets.h>
 
 WebRTC_trsp::WebRTC_trsp(ServerSocket* sock)
 : transport(sock)
@@ -53,6 +54,7 @@ void WebRTC_trsp::run()
 			mbNewSocket=false;
 		}
 
+//libwebsocket_service(LibWebsocketAdapter::getInstance()->getContext(),50);
 		// Alle FD prüfen ob irgendwas mit ihnen gemacht werden soll.
 		// => Poll
 		int n = poll(mPollFDs, mPollFDsCount, 25);
@@ -61,7 +63,7 @@ void WebRTC_trsp::run()
 			for (n = 0; n < mPollFDsCount; n++)
 			{
 				if (mPollFDs[n].revents)
-				{DBG("poll loop revents");
+				{//DBG("poll loop revents: %i , %i",n,mPollFDs[n].fd);
 					/*
 					* returns immediately if the fd does not
 					* match anything under libwebsockets
@@ -93,9 +95,9 @@ void WebRTC_trsp::recreateFDArray()
 
 	int fdIndex = 0;
 	mPollFDs[fdIndex].fd = mServerSocket->get_sd();
-	mPollFDs[fdIndex].events = POLLIN;
+	mPollFDs[fdIndex].events = POLLIN | POLLOUT;
 	mPollFDs[fdIndex].revents = 0;
-
+	DBG("ServerFD: %i",mPollFDs[fdIndex].fd);
 	fdIndex++;
 	for (ClientSocketListIterator iter = mClientSockets.begin();
 			iter != mClientSockets.end();
@@ -106,6 +108,7 @@ void WebRTC_trsp::recreateFDArray()
 		mPollFDs[fdIndex].events = POLLIN | POLLOUT;
 		mPollFDs[fdIndex].revents = 0;
 		fdIndex++;
+		DBG("ClientFD: %i",mPollFDs[fdIndex].fd);
 	}
 
 	mPollFDsCount = fdIndex;
@@ -127,12 +130,15 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 	{
 		case LWS_CALLBACK_ADD_POLL_FD:
 		{
+		    DBG("Adding Pollfd");
 			// Im User steht der verwendete SD
 			// (Eventuell steht der FD/SD auch im "in" Parameter
-			int socketDiscriptor = (int)(long)user;
-		DBG("Adding Pollfd");
+			int socketDiscriptor = wsi->sock;
+
+			if (socketDiscriptor > 0 && socketDiscriptor != mServerSocket->get_sd() && mServerSocket->get_sd() != -1){
+			    DBG("Adding Pollfd, server ready & not serverSocket");
 			// FD für die eingehende Client-Verbindung erstellen
-			ClientSocket* clientSocket = new ClientSocket(mServerSocket, wsi, socketDiscriptor, SocketHelper::getAddressStorage(context,wsi,user));
+			ClientSocket* clientSocket = new ClientSocket(mServerSocket, wsi, socketDiscriptor, SocketHelper::getAddressStorage(context,wsi,(void*)socketDiscriptor));
 			inc_ref(clientSocket);
 
 			mClientSockets.push_back(clientSocket);
@@ -143,12 +149,13 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 			pollfds[count_pollfds++].revents = 0;*/
 
 			mbNewSocket=true;
+			}
 			break;
 		}
 	    case LWS_CALLBACK_DEL_POLL_FD:
 	    {
 	    	// Bestimmen welcher Socket gelöscht werden soll
-	    	int socketDiscriptor = (int)(long)user;
+	    	int socketDiscriptor = wsi->sock;
 
 	    	// FD Wieder freigeben
 		DBG("delete Pollfd");
@@ -159,13 +166,13 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 	    		ClientSocket* clientSocket = (*iter);
 	    		if (clientSocket->get_sd() == socketDiscriptor)
 	    		{
+	    		    DBG("delete real Pollfd");
 	    			mClientSockets.remove(clientSocket);
+	    			DBG("unreg Client");
+	    			mServerSocket->unregisterClient(clientSocket);
+	    			dec_ref(clientSocket);
 	    			break;
 	    		}
-
-	    		mServerSocket->unregisterClient(clientSocket);
-
-	    		dec_ref(clientSocket);
 	    	}
 		mbNewSocket=true;
 	    	break;
@@ -193,9 +200,7 @@ int WebRTC_trsp::callbackSIP(struct libwebsocket_context *context,
 		sip_msg* s_msg = new sip_msg((const char*) in, len);
 		s_msg->local_socket = mServerSocket;
 		inc_ref(mServerSocket);
-		int users = mServerSocket->getClientSdByWSI(wsi);
-		//@TODO FEHLER: Wahrscheinlich kein fd unter user verursacht fehler: getpeername: Socket operation on non-socket
-		struct sockaddr_storage remoteSA = SocketHelper::getAddressStorage(context, wsi, (void*)users);
+		struct sockaddr_storage remoteSA = SocketHelper::getAddressStorage(context, wsi, (void*)wsi->sock);
 		memcpy(&s_msg->remote_ip, &remoteSA, sizeof(sockaddr_storage));
 		mServerSocket->copy_addr_to(&s_msg->local_ip);
 
