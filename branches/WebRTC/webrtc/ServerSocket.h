@@ -46,8 +46,10 @@ public:
 
     bool hasToSend() { return mClientSocketQueue.size() > 0; };
     void triggerSend();
-
-    int getClientSdByWSI(struct libwebsocket *wsi);
+    /**
+     *  Getter for the socket descriptor
+     */
+    int get_sd() const;
 };
 
 #endif

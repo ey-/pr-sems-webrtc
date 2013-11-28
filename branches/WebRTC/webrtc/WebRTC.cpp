@@ -33,7 +33,6 @@ int CWebRTCFactory::onLoad()
 {
 	INFO("WebRTC\tTEST\n");
 	int interfaces = AmConfig::SIP_Ifs.size() +1;
-
 	INFO("WebRTC\tInterfaces=%u", interfaces);
 
 	// Instantiate Instances of the server socket and the WebRTC Transport,
@@ -41,16 +40,18 @@ int CWebRTCFactory::onLoad()
 
 	// To create a Serversocket it needs a independed Interface Index, which
 	// isn't used yet. So we take the total number of SIP-Interfaces and add 1
-	mpServerSocket = new ServerSocket(interfaces +1);
+	mpServerSocket = new ServerSocket(1);
 	INFO("WebRTC\tServerSocket created\n");
 
 	mpWebRTCTransport = new WebRTC_trsp(mpServerSocket);
+	inc_ref(mpServerSocket);
 	INFO("WebRTC\tWebRTC Transport created\n");
-
+	trans_layer::instance()->register_transport(mpServerSocket);
+	inc_ref(mpServerSocket);
+	INFO("WebRTC\tServerSocket registered\n");
 	mpWebRTCTransport->start();
 	INFO("WebRTC\tWebRTC Transport started\n");
 
-	// TODO serversocket beim trsp_layer registieren
 	return 0;
 }
 

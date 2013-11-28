@@ -21,7 +21,7 @@ ClientSocket::ClientSocket(ServerSocket* server_sock, struct libwebsocket *wsi, 
 
 	char host[NI_MAXHOST] = "";
 	msPeerIp = am_inet_ntop(&mSocketAddress,host,NI_MAXHOST);
-	DBG("ClientSocket created PeerIP: %s",msPeerIp.c_str());
+	DBG("ClientSocket created PeerIP: %s, sd: %i, sd %i",msPeerIp.c_str(), this->get_sd(),sd);
 }
 
 ClientSocket::~ClientSocket()
@@ -44,7 +44,6 @@ ClientSocket::msg_buf::~msg_buf()
 
 int ClientSocket::send(const sockaddr_storage* sa, const char* msg, const int msg_len)
 {
-    DBG("ClientSocket send msg: %s",msg);
 	// Nachricht in den einqueuen
 	mSendQueueMutex.lock();
 	mSendQueue.push_back(new msg_buf(sa,msg,msg_len));
