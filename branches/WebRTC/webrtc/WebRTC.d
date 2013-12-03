@@ -16,4 +16,5 @@ WebRTC.o: WebRTC.cpp WebRTC.h ../../core/AmSession.h \
  ../../core/atomic_types.h ../../core/AmSessionEventHandler.h \
  ../../core/AmMediaProcessor.h WebRTC_trsp.h ../../core/sip/transport.h \
  ../../core/sip/../AmThread.h ../../core/sip/../atomic_types.h \
- ServerSocket.h ClientSocket.h ILibWebsocketCallback.h
+ ServerSocket.h ClientSocket.h ILibWebsocketCallback.h \
+ ../../core/AmConfig.h

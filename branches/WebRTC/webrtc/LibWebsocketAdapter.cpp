@@ -26,9 +26,8 @@ LibWebsocketAdapter::~LibWebsocketAdapter()
 	}
 }
 
-void LibWebsocketAdapter::initLibWebsocket()
+void LibWebsocketAdapter::initLibWebsocket(unsigned short port)
 {
-	int port = 7689;
 	const char *interface = NULL;
 
 	// we're not using ssl

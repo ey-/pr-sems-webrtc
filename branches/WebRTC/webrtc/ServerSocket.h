@@ -32,7 +32,7 @@ private:
 	AmMutex mClientSocketQueueMutex;
 
 public:
-	ServerSocket(unsigned short if_num);
+	ServerSocket(unsigned short if_num, unsigned short port);
 	~ServerSocket();
 
     virtual int send(const sockaddr_storage* sa, const char* msg, const int msg_len);
@@ -50,6 +50,8 @@ public:
      *  Getter for the socket descriptor
      */
     int get_sd() const;
+
+    int set_ip();
 };
 
 #endif

@@ -6,6 +6,7 @@
  */
 
 #include "WebRTC.h"
+#include "../../core/AmConfig.h"
 
 EXPORT_SESSION_FACTORY(CWebRTCFactory, WEBRTC_MODULE_NAME)
 
@@ -31,20 +32,36 @@ CWebRTCFactory::~CWebRTCFactory()
 
 int CWebRTCFactory::onLoad()
 {
+    unsigned short port = 7688;
+
 	INFO("WebRTC\tTEST\n");
-	int interfaces = AmConfig::SIP_Ifs.size() +1;
+	int interfaces = AmConfig::SIP_Ifs.size();
 	INFO("WebRTC\tInterfaces=%u", interfaces);
+	//Create SIP_Interface
+	AmConfig::SIP_interface intf;
+	intf.LocalPort = port;
+	intf.RtpInterface = 0;
+	intf.SigSockOpts = 0;
+	intf.LocalIP="192.168.164.137";
+	intf.name = "WS";
+	AmConfig::insert_SIP_interface(intf);
+	INFO("WebRTC\tInterfaces=%u", interfaces);
+	//webRTCInterface
 
 	// Instantiate Instances of the server socket and the WebRTC Transport,
 	// which processes this server socket.
 
 	// To create a Serversocket it needs a independed Interface Index, which
 	// isn't used yet. So we take the total number of SIP-Interfaces and add 1
-	mpServerSocket = new ServerSocket(1);
+	mpServerSocket = new ServerSocket(interfaces,port);
 	INFO("WebRTC\tServerSocket created\n");
 
 	mpWebRTCTransport = new WebRTC_trsp(mpServerSocket);
 	inc_ref(mpServerSocket);
+INFO("WebRTC\tServerSocket set IP\n");
+	//let the ServerSocket get the ip
+	mpServerSocket->set_ip();
+
 	INFO("WebRTC\tWebRTC Transport created\n");
 	trans_layer::instance()->register_transport(mpServerSocket);
 	inc_ref(mpServerSocket);
