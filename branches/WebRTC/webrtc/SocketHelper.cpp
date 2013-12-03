@@ -33,16 +33,27 @@ struct sockaddr_storage SocketHelper::getAddressStorage(struct libwebsocket_cont
 	    	DBG("SocketHelper::getAddressStorage user=%i",(int)(long)user);
 	}
 
-	libwebsockets_get_peer_addresses(context, wsi, (int)(long)user,client_name,
-						     sizeof(client_name), client_ip, sizeof(client_ip));
-    DBG("getAddressStorage ip:%s name: %s",client_ip,client_name);
+	struct sockaddr_in address = { 0 };
+	socklen_t addressLength = sizeof(address);
+	string ip;
+	int port;
+
+	int result = getpeername((int)(long)user, (struct sockaddr*) &address,&addressLength);
+
+	ip = inet_ntoa(address.sin_addr);
+	port = ntohs(address.sin_port);
+
+	//libwebsockets_get_peer_addresses(context, wsi, (int)(long)user,client_name,
+		//				     sizeof(client_name), client_ip, sizeof(client_ip));
+    DBG("getAddressStorage ip:%s name: %i",ip.c_str(),port);
 
 //	if (inet_pton(AF_INET,client_ip,&(((struct sockaddr_in *)&sa)->sin_addr)) == 0)
 //	{
 //	    DBG("IPv6");
 //		inet_pton(AF_INET6,client_ip,&(((struct sockaddr_in6 *)&sa)->sin6_addr));
 //	}
-	int ret = am_inet_pton((const char*)&client_ip,&sa);
+	int ret = am_inet_pton(ip.c_str(),&sa);
+	am_set_port(&sa,port);
 	DBG("ret am_inet_pton: %i", ret);
 	return sa;
 }
@@ -50,5 +61,13 @@ struct sockaddr_storage SocketHelper::getAddressStorage(struct libwebsocket_cont
 string SocketHelper::getConnectionIdByAddressStorage(struct sockaddr_storage* sa)
 {
 	char host[NI_MAXHOST] = "";
-	return am_inet_ntop(sa,host,NI_MAXHOST);
+	am_inet_ntop(sa,host,NI_MAXHOST);
+
+	unsigned short port = am_get_port(sa);
+
+	char output[NI_MAXHOST + 1 + 5];
+
+	sprintf(output, "%s:%u", host, port);
+
+	return output;
 }
