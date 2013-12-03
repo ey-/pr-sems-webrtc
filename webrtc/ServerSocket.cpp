@@ -11,18 +11,31 @@
 #include "SocketHelper.h"
 #include "LibWebsocketAdapter.h"
 #include <private-libwebsockets.h>
+#include "../../core/sip/ip_util.h"
 
-ServerSocket::ServerSocket(unsigned short if_num)
+ServerSocket::ServerSocket(unsigned short if_num,unsigned short port)
 :trsp_socket(if_num,0)
 {
-
+    this->port = (const unsigned short) port;
 }
 ServerSocket::~ServerSocket()
 {
 
 }
 
-
+int ServerSocket::set_ip()
+{
+    sockaddr sa;
+    socklen_t* sizeofsock;
+    DBG("ServerSock is: %i",get_sd());
+    getsockname(get_sd(),&sa,sizeofsock);
+    struct sockaddr_in *sa_ipv4 = (struct sockaddr_in *) &sa;
+    char host[NI_MAXHOST] = "";
+    inet_ntop(AF_INET, &(sa_ipv4->sin_addr.s_addr), host, INET_ADDRSTRLEN);
+    DBG("ServerIP is: %s",host);
+    ip = host;
+	return 1;
+}
 
 int ServerSocket::send(const sockaddr_storage* sa, const char* msg, const int msg_len)
 {
@@ -139,7 +152,7 @@ int ServerSocket::get_sd() const
    libwebsocket_context* context = LibWebsocketAdapter::getInstance()->getContext();
     if (context != NULL)
     {
-        return LibWebsocketAdapter::getInstance()->getContext()->fds->fd;
+        return context->fds->fd;
     }
     return -1;
 }

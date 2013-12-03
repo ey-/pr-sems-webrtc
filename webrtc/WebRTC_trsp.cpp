@@ -23,7 +23,7 @@ WebRTC_trsp::WebRTC_trsp(ServerSocket* sock)
 	mPollFDs = NULL;
 
 	// Initialisierung von LibWebsocket
-	initialize();
+	initialize((unsigned short)sock->get_port());
 
 	recreateFDArray();
 }
@@ -33,12 +33,12 @@ WebRTC_trsp::~WebRTC_trsp()
 
 }
 
-void WebRTC_trsp::initialize()
+void WebRTC_trsp::initialize(unsigned short port)
 {
 	// We register this instance as the receiver of all callbacks
 	// that are forwarded by LibWebsocket
 	LibWebsocketAdapter::getInstance()->registerCallbackReceiver(this);
-	LibWebsocketAdapter::getInstance()->initLibWebsocket();
+	LibWebsocketAdapter::getInstance()->initLibWebsocket(port);
 }
 
 void WebRTC_trsp::run()

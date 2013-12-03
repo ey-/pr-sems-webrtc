@@ -35,7 +35,7 @@ public:
 	LibWebsocketAdapter();
 	virtual ~LibWebsocketAdapter();
 
-	void initLibWebsocket();
+	void initLibWebsocket(unsigned short port);
 
 	void registerCallbackReceiver(ILibWebsocketCallback* receiver);
 

@@ -91,7 +91,7 @@ void ClientSocket::realSend()
 	      return;
 	    }*/
 
-	    DBG("bytes written: <%.*s>",bytes,msg->cursor);
+	    DBG("bytes written: <%.*s...>\n",30,msg->cursor);
 
 	    if(bytes < msg->bytes_left())
 	    {
