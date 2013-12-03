@@ -33,7 +33,7 @@ int ServerSocket::set_ip()
     char host[NI_MAXHOST] = "";
     inet_ntop(AF_INET, &(sa_ipv4->sin_addr.s_addr), host, INET_ADDRSTRLEN);
     DBG("ServerIP is: %s",host);
-    ip = host;
+    ip = "192.168.80.128";//host;
 	return 1;
 }
 

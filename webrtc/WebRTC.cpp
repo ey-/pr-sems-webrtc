@@ -42,9 +42,9 @@ int CWebRTCFactory::onLoad()
 	intf.LocalPort = port;
 	intf.RtpInterface = 0;
 	intf.SigSockOpts = 0;
-	intf.LocalIP="192.168.164.137";
+	intf.LocalIP="192.168.80.128";
 	intf.name = "WS";
-	AmConfig::insert_SIP_interface(intf);
+	AmConfig::SIP_Ifs.push_back(intf);
 	INFO("WebRTC\tInterfaces=%u", interfaces);
 	//webRTCInterface
 
