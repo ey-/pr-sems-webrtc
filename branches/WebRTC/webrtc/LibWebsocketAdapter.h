@@ -11,6 +11,9 @@
 #include "ILibWebsocketCallback.h"
 #include "singleton.h"
 #include "../../core/log.h"
+#include <string>
+using std::string;
+
 
 
 
@@ -35,7 +38,7 @@ public:
 	LibWebsocketAdapter();
 	virtual ~LibWebsocketAdapter();
 
-	void initLibWebsocket(unsigned short port);
+	void initLibWebsocket(unsigned short port,bool use_ssl,string* certpath, string* privatekeypath,string* listenintf);
 
 	void registerCallbackReceiver(ILibWebsocketCallback* receiver);
 

@@ -54,7 +54,7 @@ public:
 		                         enum libwebsocket_callback_reasons reason,
 		                         void *user, void *in, size_t len);
 
-	void initialize(unsigned short port);
+	void initialize(unsigned short port,bool use_ssl,string* certpath, string* privatekeypath, string* sInterface);
 
 protected:
 	void recreateFDArray();
