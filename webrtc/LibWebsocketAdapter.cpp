@@ -26,27 +26,31 @@ LibWebsocketAdapter::~LibWebsocketAdapter()
 	}
 }
 
-void LibWebsocketAdapter::initLibWebsocket(unsigned short port)
+void LibWebsocketAdapter::initLibWebsocket(unsigned short port,bool use_ssl,string* certpath, string* privatekeypath,string* listenintf)
 {
 	const char *interface = NULL;
+	if (listenintf != NULL) {
+	    interface = listenintf->c_str();
+	}
 
 	// we're not using ssl
-	const char *cert_path = NULL;
-	const char *key_path = NULL;
+	const char *cert_path = (use_ssl) ? certpath->c_str() : NULL;
+	const char *key_path = (use_ssl) ? privatekeypath->c_str() : NULL;
 
 	// no special options
 	int opts = 0;
 	struct lws_context_creation_info info;
 	memset(&info, 0, sizeof(info));
 	info.extensions=libwebsocket_get_internal_extensions();
-	info.port=port;
 	info.protocols =protocols;
-	info.iface= interface;
-	info.ssl_cert_filepath=cert_path;
-	info.ssl_private_key_filepath=key_path;
 	info.options=opts;
 	info.gid=-1;
 	info.uid=-1;
+
+	info.port=port;
+	info.iface= interface;
+	info.ssl_cert_filepath=cert_path;
+	info.ssl_private_key_filepath=key_path;
 
 	INFO("WebRTC\tCreating Context\n");
 

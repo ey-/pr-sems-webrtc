@@ -32,35 +32,69 @@ CWebRTCFactory::~CWebRTCFactory()
 
 int CWebRTCFactory::onLoad()
 {
-    unsigned short port = 7688;
 
-	INFO("WebRTC\tTEST\n");
+    AmConfigReader cfg;
+  if(cfg.loadFile(AmConfig::ModConfigPath + string(WEBRTC_MODULE_NAME ".conf")))
+    return -1;
+
+  // get application specific global parameters
+  configureModule(cfg);
+
+  string sPort = cfg.getParameter("port","7689");
+
+  string sInterface = cfg.getParameter("interface","eth0");
+
+  string sInterfaceListen = cfg.getParameter("listeninterface","0");
+
+  string sWSS = cfg.getParameter("wss","0");
+  bool bUseWSS = (sWSS.c_str() == "1") ? true : false;
+
+
+  string* sCertPath = NULL;
+  string* sPrivateKeyPath = NULL;
+
+  if (bUseWSS) {
+      string sCertPath = cfg.getParameter("ssl_cert_filepath","0");
+      string sPrivateKeyPath = cfg.getParameter("ssl_private_key_filepath","0");
+    }
+
+
+    unsigned short port = atoi(sPort.c_str());
+
+
+    string* sServerInterface = (sInterfaceListen.c_str() == "1") ? &sInterface : NULL;
+
+
 	int interfaces = AmConfig::SIP_Ifs.size();
+
+    // Instantiate Instances of the server socket and the WebRTC Transport,
+	// which processes this server socket.
+
+	// To create a Serversocket it needs a independed Interface Index, which
+	// isn't used yet. So we take the total number of SIP-Interfaces and add 1
+	mpServerSocket = new ServerSocket(interfaces,port,bUseWSS,sCertPath,sPrivateKeyPath,sServerInterface);
+	INFO("WebRTC\tServerSocket created\n");
+	INFO("WebRTC\tServerSocket set IP\n");
+	//let the ServerSocket get the ip
+	string sIP = mpServerSocket->set_ip(sInterface);
+
 	INFO("WebRTC\tInterfaces=%u", interfaces);
 	//Create SIP_Interface
 	AmConfig::SIP_interface intf;
 	intf.LocalPort = port;
 	intf.RtpInterface = 0;
 	intf.SigSockOpts = 0;
-	intf.LocalIP="192.168.80.128";
+	intf.LocalIP=sIP.c_str();
 	intf.name = "WS";
 	AmConfig::SIP_Ifs.push_back(intf);
 	INFO("WebRTC\tInterfaces=%u", interfaces);
 	//webRTCInterface
 
-	// Instantiate Instances of the server socket and the WebRTC Transport,
-	// which processes this server socket.
 
-	// To create a Serversocket it needs a independed Interface Index, which
-	// isn't used yet. So we take the total number of SIP-Interfaces and add 1
-	mpServerSocket = new ServerSocket(interfaces,port);
-	INFO("WebRTC\tServerSocket created\n");
 
 	mpWebRTCTransport = new WebRTC_trsp(mpServerSocket);
 	inc_ref(mpServerSocket);
-INFO("WebRTC\tServerSocket set IP\n");
-	//let the ServerSocket get the ip
-	mpServerSocket->set_ip();
+
 
 	INFO("WebRTC\tWebRTC Transport created\n");
 	trans_layer::instance()->register_transport(mpServerSocket);

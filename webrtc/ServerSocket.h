@@ -31,8 +31,13 @@ private:
 	CLIENT_SOCKET_QUEUE mClientSocketQueue;
 	AmMutex mClientSocketQueueMutex;
 
+	bool use_ssl;
+	string* cert_filepath;
+	string* privatkey_path;
+
+	string* mInterfaceString;
 public:
-	ServerSocket(unsigned short if_num, unsigned short port);
+	ServerSocket(unsigned short if_num, unsigned short port, bool ssl, string* certpath, string* privatekeypath,string* sInterface);
 	~ServerSocket();
 
     virtual int send(const sockaddr_storage* sa, const char* msg, const int msg_len);
@@ -51,7 +56,13 @@ public:
      */
     int get_sd() const;
 
-    int set_ip();
+    string set_ip(string interfacestring);
+
+    bool get_use_ssl(){return use_ssl;};
+    string* get_cert_filepath(){return cert_filepath;};
+    string* get_privatekey_path(){return privatkey_path;};
+
+    string* get_InterfaceString(){return mInterfaceString;};
 };
 
 #endif

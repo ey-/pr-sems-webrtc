@@ -12,29 +12,71 @@
 #include "LibWebsocketAdapter.h"
 #include <private-libwebsockets.h>
 #include "../../core/sip/ip_util.h"
+#include <ifaddrs.h>
 
-ServerSocket::ServerSocket(unsigned short if_num,unsigned short port)
+ServerSocket::ServerSocket(unsigned short if_num,unsigned short port, bool ssl, string* certpath, string* privatekeypath, string* sInterface)
 :trsp_socket(if_num,0)
 {
     this->port = (const unsigned short) port;
+    this->use_ssl = ssl;
+    this->cert_filepath = certpath;
+    this->privatkey_path = privatekeypath;
+    this->mInterfaceString = sInterface;
 }
 ServerSocket::~ServerSocket()
 {
 
 }
 
-int ServerSocket::set_ip()
+/**
+ * see http://man7.org/linux/man-pages/man3/getifaddrs.3.html
+ */
+string ServerSocket::set_ip(string interfacestring)
 {
-    sockaddr sa;
-    socklen_t* sizeofsock;
-    DBG("ServerSock is: %i",get_sd());
-    getsockname(get_sd(),&sa,sizeofsock);
-    struct sockaddr_in *sa_ipv4 = (struct sockaddr_in *) &sa;
-    char host[NI_MAXHOST] = "";
-    inet_ntop(AF_INET, &(sa_ipv4->sin_addr.s_addr), host, INET_ADDRSTRLEN);
-    DBG("ServerIP is: %s",host);
-    ip = "192.168.80.128";//host;
-	return 1;
+    struct ifaddrs *ifaddr, *ifa;
+    int family, s;
+    char* intfname;
+    char host[NI_MAXHOST];
+
+
+    if (getifaddrs(&ifaddr) == -1) {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+        }
+        /* Walk through linked list, maintaining head pointer so we
+              can free list later */
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+        continue;
+
+        family = ifa->ifa_addr->sa_family;
+        intfname = ifa->ifa_name;
+        /* Display interface name and family (including symbolic
+                  form of the latter for the common families) */
+                   printf("%s  address family: %d%s\n",
+                       ifa->ifa_name, family,
+                       (family == AF_PACKET) ? " (AF_PACKET)" :
+                       (family == AF_INET) ?   " (AF_INET)" :
+                       (family == AF_INET6) ?  " (AF_INET6)" : "");
+
+        /* For an AF_INET* interface address, display the address */
+        if ((strcmp(intfname,interfacestring.c_str()) == 0) && (family == AF_INET || family == AF_INET6)){
+            s = getnameinfo(ifa->ifa_addr,
+                           (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                                 sizeof(struct sockaddr_in6),
+                           host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+                exit(EXIT_FAILURE);
+            }
+            ip = host;
+            DBG("ServerIP: <%s>\n", host);
+            freeifaddrs(ifaddr);
+            return host;
+        }
+    }
+    ERROR("Interface %s given in Config not found",interfacestring.c_str());
+    return "127.0.0.1";
 }
 
 int ServerSocket::send(const sockaddr_storage* sa, const char* msg, const int msg_len)

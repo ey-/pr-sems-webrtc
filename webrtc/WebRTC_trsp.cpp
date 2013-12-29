@@ -23,7 +23,7 @@ WebRTC_trsp::WebRTC_trsp(ServerSocket* sock)
 	mPollFDs = NULL;
 
 	// Initialisierung von LibWebsocket
-	initialize((unsigned short)sock->get_port());
+	initialize((unsigned short)sock->get_port(),sock->get_use_ssl(),sock->get_cert_filepath(),sock->get_privatekey_path(),sock->get_InterfaceString());
 
 	recreateFDArray();
 }
@@ -33,12 +33,12 @@ WebRTC_trsp::~WebRTC_trsp()
 
 }
 
-void WebRTC_trsp::initialize(unsigned short port)
+void WebRTC_trsp::initialize(unsigned short port,bool use_ssl,string* certpath, string* privatekeypath,string* sInterface)
 {
 	// We register this instance as the receiver of all callbacks
 	// that are forwarded by LibWebsocket
 	LibWebsocketAdapter::getInstance()->registerCallbackReceiver(this);
-	LibWebsocketAdapter::getInstance()->initLibWebsocket(port);
+	LibWebsocketAdapter::getInstance()->initLibWebsocket(port,use_ssl,certpath,privatekeypath,sInterface);
 }
 
 void WebRTC_trsp::run()
@@ -97,7 +97,7 @@ void WebRTC_trsp::recreateFDArray()
 	mPollFDs[fdIndex].fd = mServerSocket->get_sd();
 	mPollFDs[fdIndex].events = POLLIN | POLLOUT;
 	mPollFDs[fdIndex].revents = 0;
-	DBG("ServerFD: %i",mPollFDs[fdIndex].fd);
+	//DBG("ServerFD: %i",mPollFDs[fdIndex].fd);
 	fdIndex++;
 	for (ClientSocketListIterator iter = mClientSockets.begin();
 			iter != mClientSockets.end();
@@ -108,7 +108,7 @@ void WebRTC_trsp::recreateFDArray()
 		mPollFDs[fdIndex].events = POLLIN | POLLOUT;
 		mPollFDs[fdIndex].revents = 0;
 		fdIndex++;
-		DBG("ClientFD: %i",mPollFDs[fdIndex].fd);
+		//DBG("ClientFD: %i",mPollFDs[fdIndex].fd);
 	}
 
 	mPollFDsCount = fdIndex;
@@ -130,24 +130,20 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 	{
 		case LWS_CALLBACK_ADD_POLL_FD:
 		{
-		    DBG("Adding Pollfd");
+		    //DBG("Adding Pollfd");
 			// Im User steht der verwendete SD
 			// (Eventuell steht der FD/SD auch im "in" Parameter
 			int socketDiscriptor = wsi->sock;
 
 			if (socketDiscriptor > 0 && socketDiscriptor != mServerSocket->get_sd() && mServerSocket->get_sd() != -1){
-			    DBG("Adding Pollfd, server ready & not serverSocket");
-			// FD für die eingehende Client-Verbindung erstellen
+			    //Create Cliensocket
 			ClientSocket* clientSocket = new ClientSocket(mServerSocket, wsi, socketDiscriptor, SocketHelper::getAddressStorage(context,wsi,(void*)socketDiscriptor));
 			inc_ref(clientSocket);
 
 			mClientSockets.push_back(clientSocket);
 
 			mServerSocket->registerClient(clientSocket);
-			/*pollfds[count_pollfds].fd = (int)(long)user;
-			pollfds[count_pollfds].events = (int)len;
-			pollfds[count_pollfds++].revents = 0;*/
-
+			//Socketarray will be refreshed
 			mbNewSocket=true;
 			}
 			break;
@@ -158,7 +154,6 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 	    	int socketDiscriptor = wsi->sock;
 
 	    	// FD Wieder freigeben
-		DBG("delete Pollfd");
 	    	for (ClientSocketListIterator iter = mClientSockets.begin();
 	    			iter != mClientSockets.end();
 	    			iter++)
@@ -166,7 +161,6 @@ int WebRTC_trsp::callbackHTTP(struct libwebsocket_context *context,
 	    		ClientSocket* clientSocket = (*iter);
 	    		if (clientSocket->get_sd() == socketDiscriptor)
 	    		{
-	    		    DBG("delete real Pollfd");
 	    			mClientSockets.remove(clientSocket);
 	    			DBG("unreg Client");
 	    			mServerSocket->unregisterClient(clientSocket);
