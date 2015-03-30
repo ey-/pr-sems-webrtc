@@ -1,0 +1,1 @@
+•git clone git://git.sip-router.org/sems
